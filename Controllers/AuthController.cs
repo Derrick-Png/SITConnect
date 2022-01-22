@@ -20,10 +20,15 @@ namespace SITConnect.Controllers
             return View();
         }
 
-        [HttpGet]
+        [HttpGet("Register")]
         public IActionResult Register()
         {
             return View();
+        }
+        [HttpPost("Register")]
+        public IActionResult Register_Post()
+        {
+            return RedirectToAction("Login","Auth");
         }
     }
 }

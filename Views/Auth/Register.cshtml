@@ -5,18 +5,70 @@
     Layout = "~/Views/Shared/_Layout_2.cshtml";
 }
 <div class="container has-text-centered slide-up">
-    <div class="file is-boxed is-info">
-        <div class="column is-8 is-offset-2" style="border: 1px solid black">
-            <h3 class="title">Register</h3>
+    <form asp-controller="Auth" asp-action="Register" method="post" >
+        <div class="file is-boxed is-info">
+            <div class="column is-8 is-offset-2" style="border: 1px solid black">
+                <h3 class="title">Register</h3>
 
-            <div class="field is-grouped is-grouped-centered">
-                <div class="control">
-                    <input class="input is-link" type="text" placeholder="Link input">
+                <div class="field is-grouped is-grouped-centered">
+                    <div class="field-label">
+                        <label class="label">Name</label>
+                    </div>
+                    <div class="field-body is-grouped-centered">
+                        <div class="control">
+                            <input class="input is-link" type="text" placeholder="First Name">
+                        </div>
+                        <div class="control">
+                            <input class="input is-link" type="text" placeholder="Last Name">
+                        </div>
+                    </div>
                 </div>
-                <div class="control">
-                    <input class="input is-link" type="text" placeholder="Link input">
+                <div class="field is-grouped is-centered">
+                    <div class="field-label">
+                        <label class="label">Email</label>
+                    </div>
+                    <div class="field-body">
+                        <div class="control">
+                            <input class="input is-info" type='text' placeholder="Credit Card" />
+                        </div>
+                    </div>
+                </div>
+                <div class="field is-grouped is-centered">
+                    <div class="field-label">
+                        <label class="label">Password</label>
+                    </div>
+                    <div class="field-body">
+                        <div class="control">
+                            <input class="input is-info" type='text' placeholder="Credit Card" />
+                        </div>
+                    </div>
+                </div>
+                <div class="field is-grouped is-centered">
+                    <div class="field-label">
+                        <label class="label">Date Of Birth</label>
+                    </div>
+                    <div class="field-body">
+                        <div class="control">
+                            <input class="input is-info" type='date' placeholder="Credit Card" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field is-grouped is-centered">
+                    <div class="field-label">
+                        <label class="label">Credit Card</label>
+                    </div>
+                    <div class="field-body">
+
+                        <input class="input is-info" type='text' placeholder="Credit Card" />
+
+                    </div>
+                </div>
+
+                <div class="field is-right">
+                    <button class="button is-right is-info" type="submit">Register</button>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>

@@ -1,0 +1,31 @@
+﻿<Properties StartupConfiguration="{D35370BC-4D11-4DC7-BA79-8916B0398F24}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Controllers/AuthController.cs">
+    <Files>
+      <File FileName="Startup.cs" Line="27" Column="41" />
+      <File FileName="Views/Shared/_Layout.cshtml" />
+      <File FileName="Views/Auth/Register.cshtml" Line="8" Column="67" />
+      <File FileName="Controllers/AuthController.cs" Line="29" Column="19" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="SITConnect" expanded="True">
+            <Node name="SITConnect" expanded="True">
+              <Node name="Controllers" expanded="True">
+                <Node name="AuthController.cs" selected="True" />
+              </Node>
+              <Node name="Views" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.SITConnect PreferredExecutionTarget="/Applications/Google Chrome.app" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>

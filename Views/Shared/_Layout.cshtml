@@ -14,11 +14,20 @@
             <header class="navbar" style="background-color: #f8f9fa;">
                 <div class="navbar-brand">
                     <a class="navbar-item" asp-area="" asp-controller="Home" asp-action="Index">
-                        
+
                     </a>
+                    <div id="nav-toggle" class="nav-toggle navbar-burger" data-target="nav-menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </div>
+
                 <div class="container-fluid mx-auto">
-                    <div id="navbar_menu" class="navbar-menu">
+                    <div id="navbar-menu" class="navbar-menu">
+                        <nav class="navbar-start">
+
+                        </nav>
                         <nav class="navbar-end">
                             <a class="navbar-item" asp-area="" asp-controller="Home" asp-action="Index">
                                 Home
@@ -38,7 +47,7 @@
             </header>
         </div>
         <div class="hero-body">
-                @RenderBody()
+            @RenderBody()
         </div>
         <footer class="hero-foot">
             <div class="container">
@@ -46,12 +55,24 @@
             </div>
         </footer>
     </section>
-    
+
 
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script type="text/javascript">
+        document.getElementById("nav-toggle").addEventListener("click", toggleNav);
+        function toggleNav() {
+            var nav = document.getElementById("navbar-menu");
+            var className = nav.getAttribute("class");
+            if (className == "navbar-menu") {
+                nav.className = "navbar-menu is-active";
+            } else {
+                nav.className = "navbar-menu";
+            }
+        }</script>
+
 </body>
 </html>
