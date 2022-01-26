@@ -25,9 +25,17 @@ namespace SITConnect.Controllers
         {
             return View();
         }
+
+        [HttpGet("Register2")]
+        public IActionResult Register2()
+        {
+            return View();
+        }
+
         [HttpPost("Register")]
         public IActionResult Register_Post()
         {
+
             return RedirectToAction("Login","Auth");
         }
     }

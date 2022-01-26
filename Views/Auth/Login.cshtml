@@ -2,6 +2,117 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    Layout = "~/Views/Shared/_Layout_2.cshtml";
+    Layout = "~/Views/Shared/_Layout_3.cshtml";
 }
-Login
+<div class="column is-8 is-offset-3">
+    <div class="container has-text-centered slide-up">
+        
+
+        
+        <form asp-controller="Auth" asp-action="Register" method="post">
+            <div class="columns is-gapless">
+                <div class="column is-4 is-flex">
+                    <div class="box is-flex">
+                        <div class="hero">
+                            <div class="hero-head">
+                                <div class="navbar">
+                                    <div class="navbar-menu">
+                                        <div class="navbar-start">
+                                            <a class="is-info" asp-controller="Home" asp-action="Index" >
+                                                <span class="icon is-left">
+                                                    <i class="fas fa-arrow-left"></i>
+                                                </span>
+                                                Back
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="hero-body">
+                                <div class="container has-text-centered slide-up fade-in">
+                                    <p class="title fade-in">
+                                        <img src="~/logo.png" width="200" />
+                                    </p>
+                                    <p class="subtitle fade-in">
+                                        Stationaries at the lowest prices
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="hero-foot fade-in">
+                                Developed By Derrick Png
+                                
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                    <div class="column is-5 is-flex ">
+                        <div class="box is-flex">
+                            <div class="hero">
+                                <div class="hero-body">
+                                    <div class="container has-text-centered">
+                                        @*<h3 class="title"><a class="is-link" asp-controller="Auth" asp-action="Login">Login </a> / Register</h3>*@
+                                        <p style="font-size:12px;">&nbsp;</p>
+                                        @*<div class="field is-centered">
+
+
+            <div class="control">
+                <div class="file is-boxed is-centered">
+                    <label class="file-label">
+                        <input class="file-input" type="file" name="profile_pic">
+                        <figure class="image is-128x128" style="border: 1px solid black">
+                            <img class="is-rounded" src="/images/upload_2.png">
+                        </figure>
+                    </label>
+                </div>
+            </div>
+
+        </div>*@
+                                        <p style="font-size:6px;">&nbsp;</p>
+                                        <p style="font-size:6px;">&nbsp;</p>
+
+                                        <div class="field is-grouped is-grouped-centered">
+                                            @*<div class="control">
+                <label class="label">Email</label>
+            </div>*@
+                                            <div class="control is-expanded has-icons-left">
+                                                <input class="input is-primary" type='text' placeholder="Email" />
+                                                <span class="icon is-small is-left">
+                                                    <i class="fas fa-envelope"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p style="font-size:6px;">&nbsp;</p>
+
+                                        <div class="field is-grouped is-grouped-centered">
+                                            @*<div class="control">
+                <label class="label">Password</label>
+            </div>*@
+                                            <div class="control is-expanded has-icons-left">
+                                                <input class="input is-info" type='text' placeholder="Password" />
+                                                <span class="icon is-small is-left">
+                                                    <i class="fas fa-key"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p style="font-size:6px;">&nbsp;</p>
+
+                                        <div class="field is-centered">
+                                            <div class="control is-expanded">
+                                                <button class="input button is-link is-light is-outlined" type="submit">Login</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="hero-foot has-text-centered">
+                                    <a class="button is-success is-light is-outlined" asp-controller="Auth" asp-action="Register">Register here</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+</form>
+        
+    </div>
+</div>

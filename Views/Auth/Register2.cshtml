@@ -1,0 +1,107 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/Shared/_Layout_2.cshtml";
+}
+<div class="container has-text-centered slide-up">
+    <form asp-controller="Auth" asp-action="Register" method="post">
+        <div class="file is-boxed is-info">
+            <div class="column is-4 is-offset-4 ">
+                <div class="box">
+                    <h3 class="title">Register</h3>
+
+                    <div class="field is-centered">
+
+
+                        <div class="control">
+                            <div class="file is-boxed is-centered">
+                                <label class="file-label">
+                                    <input class="file-input" type="file" name="profile_pic">
+                                    <figure class="image is-128x128" style="border: 1px solid black">
+                                        <img class="is-rounded" src="/images/upload_2.png">
+                                    </figure>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                    <p style="font-size:6px;">&nbsp;</p>
+                    <div class="field is-grouped is-grouped-centered">
+                        @*<div class="control">
+                <label class="label">Name</label>
+            </div>*@
+                        <div class="control is-expanded has-icons-left">
+                            <input class="input is-link" type="text" placeholder="First Name">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        </div>
+                        <div class="control is-expanded has-icons-left">
+                            <input class="input is-link" type="text" placeholder="Last Name">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-user"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p style="font-size:6px;">&nbsp;</p>
+
+                    <div class="field is-grouped is-grouped-centered">
+                        @*<div class="control">
+                <label class="label">Email</label>
+            </div>*@
+                        <div class="control is-expanded has-icons-left">
+                            <input class="input is-primary" type='text' placeholder="Email" />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p style="font-size:6px;">&nbsp;</p>
+
+                    <div class="field is-grouped is-grouped-centered">
+                        @*<div class="control">
+                <label class="label">Password</label>
+            </div>*@
+                        <div class="control is-expanded has-icons-left">
+                            <input class="input is-primary" type='text' placeholder="Password" />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-key"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p style="font-size:6px;">&nbsp;</p>
+
+                    <div class="field is-grouped is-grouped-centered">
+                        @*<div class="control">
+                <label class="label">Date Of Birth</label>
+            </div>*@
+                        <div class="control is-expanded">
+                            <input class="input is-info" type='date' placeholder="Date Of Birth" />
+                        </div>
+                    </div>
+
+                   <p style="font-size:6px;"> &nbsp; </p>
+                    <div class="field is-grouped is-grouped-centered">
+                        @*<div class="control">
+                <label class="label">Credit Card</label>
+            </div>*@
+                        <div class="control is-expanded has-icons-left">
+                            <input class="input is-warning" type='text' placeholder="Credit Card" />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-credit-card"></i>
+                            </span>
+                        </div>
+
+                    </div>
+                   <p style="font-size:6px;">&nbsp;</p>
+                    <div class="field is-centered">
+                        <div class="control is-expanded">
+                            <button class="input button is-link" type="submit">Register</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
