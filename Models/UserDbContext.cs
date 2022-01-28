@@ -10,14 +10,9 @@ namespace SITConnect.Models
     public class UserDbContext : DbContext
     {
         private readonly IConfiguration _config;
-        public UserDbContext(IConfiguration conf)
+        public UserDbContext(IConfiguration conf, DbContextOptions<UserDbContext> options) : base(options)
         {
             _config = conf;
-        }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            string connectionString = _config.GetConnectionString("db");
-            optionsBuilder.UseSqlServer(connectionString);
         }
 
         public DbSet<User> Users { get; set; }

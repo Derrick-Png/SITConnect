@@ -14,27 +14,29 @@ namespace SITConnect.Services
             _db = userdb;
         }
 
-        public bool insertUser(User user)
+        public async Task<bool> insertUser(User user)
         {
             // TODO: Implement creating user
             try
             {
                 _db.Users.Add(user);
+                await _db.SaveChangesAsync();
                 return true;
             }
             catch(Exception e)
             {
+                Console.WriteLine(e);
                 return false;
             }
         }
-        public User? findUserByEmail(string email)
+        public User findUserByEmail(string email)
         {
             // Used in verifying duplicated users in registration
             // 
-
-            User user = null;
-            user = _db.Users.FirstOrDefault(user => user.email == email);
-            return user;
+            return _db.Users.FirstOrDefault(user => user.email == email);
+            
         }
+
+        public List<User> retrieveUsers() { return _db.Users.ToList();  }
     }
 }
