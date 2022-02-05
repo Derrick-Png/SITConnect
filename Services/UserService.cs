@@ -33,7 +33,7 @@ namespace SITConnect.Services
         {
             // Used in verifying duplicated users in registration
             // 
-            return _db.Users.FirstOrDefault(user => user.email == email);
+            return _db.Users.FirstOrDefault(user => user.Email == email);
             
         }
 

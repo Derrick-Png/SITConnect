@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using SITConnect.Models;
 using SITConnect.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace SITConnect
 {
@@ -29,8 +30,42 @@ namespace SITConnect
             services.AddRazorPages().AddRazorRuntimeCompilation();
             services.AddControllersWithViews();
 
-            services.AddDbContext<UserDbContext>(options=> { options.UseSqlServer(Configuration.GetConnectionString("db")); });
+            services.AddDbContextPool<UserDbContext>(options=> { options.UseSqlServer(Configuration.GetConnectionString("db")); });
             services.AddScoped<UserService>();
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+            services.AddIdentity<User, IdentityRole>(opt =>
+            {
+                opt.SignIn.RequireConfirmedEmail = true;
+            })
+                .AddEntityFrameworkStores<UserDbContext>()
+                .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
+
+            services.Configure<IdentityOptions>(opt =>
+            {
+                // Strong Password Part 1
+                opt.Password.RequireDigit = true;
+                opt.Password.RequireLowercase = true;
+                opt.Password.RequireNonAlphanumeric = true;
+                opt.Password.RequireUppercase = true;
+                opt.Password.RequiredLength = 12;
+                opt.Password.RequiredUniqueChars = 1;
+
+
+                opt.Lockout.AllowedForNewUsers = true;
+                opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                opt.Lockout.MaxFailedAccessAttempts = 3; // Login (ii)
+
+                opt.User.AllowedUserNameCharacters =
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                opt.User.RequireUniqueEmail = true; // Unique Email
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,11 +83,15 @@ namespace SITConnect
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
+
+
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

@@ -1,0 +1,111 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model User
+@{
+    Layout = "~/Views/Shared/_Layout_3.cshtml";
+}
+<div class="column is-8 is-offset-3">
+    <div class="container has-text-centered slide-up">
+        <div class="columns is-gapless">
+            <div class="column is-4 is-flex">
+                <div class="box is-flex">
+                    <div class="hero">
+                        <div class="hero-head">
+                            <p class="title">Profile</p>
+                        </div>
+                        <div class="hero-body">
+                            <div class="tile is-ancestor is-vertical">
+                                <div class="tile">
+                                    <div class="tile is-parent is-vertical slide-up fade-in">
+                                        <div class="tile is-child">
+                                            <figure class="image is-1by1">
+                                                <img class="is-rounded" src="/user/images/@Model.UserName"+".png" onerror="this.src='https://bulma.io/images/placeholders/128x128.png'" />
+                                            </figure>
+                                        </div>
+                                        <div class="tile is-child">
+                                            <div class="field">
+                                                <label class="label">Name</label>
+                                                <div class="control">
+                                                    <p class="subtitle">@Model.fname @Model.lname </p>
+                                                </div>
+                                            </div>
+                                           
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tile is-vertical slide-up fade-in">
+                                    <div class="field">
+                                        <label class="label">Email </label>
+                                        <div class="control">
+                                            <p class="subtitle">@Model.Email</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="field">
+                                        <label class="label">Password </label>
+                                        <div class="control">
+                                            <p class="subtitle">@Model.PasswordHash</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="field">
+                                        <label class="label">Credit Card </label>
+                                        <div class="control">
+                                            <p class="subtitle">@Model.cc</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="field">
+                                        <label class="label">Date Of Birth</label>
+                                        <div class="control">
+                                            <p class="subtitle">@Html.DisplayFor(model => model.dob)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <div class="hero-foot fade-in">
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="column is-5 is-flex">
+                <div class="box is-flex">
+                    <div class="hero">
+                        <div class="hero-head">
+                            <div class="navbar">
+                                <div class="navbar-menu">
+                                    <div class="navbar-end">
+                                        <a class="button is-info" asp-controller="Auth" asp-action="Sign_Out">
+                                            <span class="icon is-left">
+                                                <i class="fas fa-arrow-left"></i>
+                                            </span>
+                                            Sign Out
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hero-body">
+
+                        </div>
+
+                        <div class="hero-foot fade-in">
+                            Developed By Derrick Png
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
