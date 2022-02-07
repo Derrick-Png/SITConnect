@@ -6,10 +6,10 @@
 }
 <div class="column is-8 is-offset-3">
     <div class="container has-text-centered slide-up">
-        
 
-        @Html.ValidationSummary()
-        <form asp-controller="Auth" asp-action="Login" method="post">
+
+        
+        <form id="Login_Form" asp-controller="Auth" asp-action="Login" method="post">
             <div class="columns is-gapless">
                 <div class="column is-4 is-flex">
                     <div class="box is-flex">
@@ -18,7 +18,7 @@
                                 <div class="navbar">
                                     <div class="navbar-menu">
                                         <div class="navbar-start">
-                                            <a class="is-info" asp-controller="Home" asp-action="Index" >
+                                            <a class="is-info" asp-controller="Home" asp-action="Index">
                                                 <span class="icon is-left">
                                                     <i class="fas fa-arrow-left"></i>
                                                 </span>
@@ -41,20 +41,20 @@
 
                             <div class="hero-foot fade-in">
                                 Developed By Derrick Png
-                                
+
                             </div>
 
                         </div>
                     </div>
                 </div>
-                    <div class="column is-5 is-flex ">
-                        <div class="box is-flex">
-                            <div class="hero">
-                                <div class="hero-body">
-                                    <div class="container has-text-centered">
-                                        @*<h3 class="title"><a class="is-link" asp-controller="Auth" asp-action="Login">Login </a> / Register</h3>*@
-                                        <p style="font-size:12px;">&nbsp;</p>
-                                        @*<div class="field is-centered">
+                <div class="column is-5 is-flex ">
+                    <div class="box is-flex">
+                        <div class="hero">
+                            <div class="hero-body">
+                                <div class="container has-text-centered">
+                                    @*<h3 class="title"><a class="is-link" asp-controller="Auth" asp-action="Login">Login </a> / Register</h3>*@
+                                    <p style="font-size:12px;">&nbsp;</p>
+                                    @*<div class="field is-centered">
 
 
             <div class="control">
@@ -69,50 +69,68 @@
             </div>
 
         </div>*@
-                                        <p style="font-size:6px;">&nbsp;</p>
-                                        <p style="font-size:6px;">&nbsp;</p>
+                                    <p style="font-size:6px;">&nbsp;</p>
+                                    <p style="font-size:6px;">&nbsp;</p>
 
-                                        <div class="field is-grouped is-grouped-centered">
-                                            @*<div class="control">
+                                    <div class="field is-grouped is-grouped-centered">
+                                        @*<div class="control">
                 <label class="label">Email</label>
             </div>*@
-                                            <div class="control is-expanded has-icons-left">
-                                                <input class="input is-primary" name="email" type='email' placeholder="Email" />
-                                                <span class="icon is-small is-left">
-                                                    <i class="fas fa-envelope"></i>
-                                                </span>
-                                            </div>
+                                        <div class="control is-expanded has-icons-left">
+                                            <input class="input is-primary" name="email" type='email' placeholder="Email" />
+                                            <span class="icon is-small is-left">
+                                                <i class="fas fa-envelope"></i>
+                                            </span>
                                         </div>
-                                        <p style="font-size:6px;">&nbsp;</p>
+                                    </div>
+                                    <p style="font-size:6px;">&nbsp;</p>
 
-                                        <div class="field is-grouped is-grouped-centered">
-                                            @*<div class="control">
+                                    <div class="field is-grouped is-grouped-centered">
+                                        @*<div class="control">
                 <label class="label">Password</label>
             </div>*@
-                                            <div class="control is-expanded has-icons-left">
-                                                <input class="input is-info" name="password" type='password' placeholder="Password" />
-                                                <span class="icon is-small is-left">
-                                                    <i class="fas fa-key"></i>
-                                                </span>
-                                            </div>
+                                        <div class="control is-expanded has-icons-left">
+                                            <input class="input is-info" name="password" type='password' placeholder="Password" />
+                                            <span class="icon is-small is-left">
+                                                <i class="fas fa-key"></i>
+                                            </span>
                                         </div>
-                                        <p style="font-size:6px;">&nbsp;</p>
-
-                                        <div class="field is-centered">
-                                            <div class="control is-expanded">
-                                                <button class="input button is-link is-light is-outlined" type="submit">Login</button>
-                                            </div>
+                                    </div>
+                                    <p style="font-size:6px;">&nbsp;</p>
+                                    @Html.ValidationSummary()
+                                    <input type="hidden" id="token" name="token" />
+                                    <div class="field is-centered">
+                                        <div class="control is-expanded">
+                                            <button data-sitekey="6LfBw2EeAAAAAOWs7S-UEbTZ06HRMlGL765U6lwS"
+                                                    data-callback='onSubmit'
+                                                    data-action='submit'
+                                                    class="input button is-link is-light is-outlined g-recaptcha"
+                                                    type="submit"
+                                                    id="Register_Button">
+                                                Login
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="hero-foot has-text-centered">
-                                    <a class="button is-success is-light is-outlined" asp-controller="Auth" asp-action="Register">Register here</a>
-                                </div>
+                            </div>
+                            <div class="hero-foot has-text-centered">
+                                <a class="button is-success is-light is-outlined" asp-controller="Auth" asp-action="Register">Register here</a>
                             </div>
                         </div>
                     </div>
                 </div>
-</form>
-        
+            </div>
+        </form>
+
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        function onSubmit(token) {
+            document.getElementById("token").value = token;
+            document.getElementById("Login_Form").submit()
+        }
+    </script>
+}

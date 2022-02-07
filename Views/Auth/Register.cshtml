@@ -9,7 +9,7 @@
     <div class="container has-text-centered slide-up">
 
 
-        <form asp-controller="Auth" asp-action="Register" method="post" enctype="multipart/form-data">
+        <form id="Register_Form" asp-controller="Auth" asp-action="Register" method="post" enctype="multipart/form-data">
             <div class="columns is-gapless is-grouped">
                 <div class="column is-5 is-flex">
                     <div class="box is-flex">
@@ -69,8 +69,8 @@
                         <p style="font-size:6px;">&nbsp;</p>
                         <div class="field is-grouped is-grouped-centered">
                             @*<div class="control">
-                                    <label class="label">Name</label>
-                                </div>*@
+                <label class="label">Name</label>
+            </div>*@
                             <div class="control is-expanded has-icons-left">
                                 @Html.EditorFor(m => m.fname, new { htmlAttributes = new { @class = "input is-link", @placeholder = "First Name" } })
                                 <span class="icon is-small is-left">
@@ -94,8 +94,8 @@
 
                         <div class="field is-grouped is-grouped-centered">
                             @*<div class="control">
-                                    <label class="label">Email</label>
-                                </div>*@
+                <label class="label">Email</label>
+            </div>*@
                             <div class="control is-expanded has-icons-left">
                                 @Html.EditorFor(m => m.Email, new { htmlAttributes = new { @class = "input is-primary", @placeholder = "Email", @type = "email" } })
                                 <span class="icon is-small is-left">
@@ -166,8 +166,8 @@
 
                         <div class="field is-grouped is-grouped-centered">
                             @*<div class="control">
-                                    <label class="label">Date Of Birth</label>
-                                </div>*@
+                <label class="label">Date Of Birth</label>
+            </div>*@
                             <div class="control is-expanded">
                                 @Html.EditorFor(m => m.dob, new { htmlAttributes = new { @class = "input is-info", @placeholder = "Date Of Birth" } })
                             </div>
@@ -179,8 +179,8 @@
                         <p style="font-size:6px;"> &nbsp; </p>
                         <div class="field is-grouped is-grouped-centered">
                             @*<div class="control">
-                                    <label class="label">Credit Card</label>
-                                </div>*@
+                <label class="label">Credit Card</label>
+            </div>*@
                             <div class="control is-expanded has-icons-left">
                                 @Html.EditorFor(m => m.cc, new { htmlAttributes = new { @class = "input is-warning", @placeholder = "Credit Card" } })
                                 <span class="icon is-small is-left">
@@ -194,14 +194,17 @@
                         </div>
                         <p style="font-size:6px;">&nbsp;</p>
                         @Html.ValidationSummary()
+                        <input type="hidden" id="token" name="token" />
                         <div class="field is-grouped is-centered">
                             <div class="control is-expanded">
                                 <button data-sitekey="6LfBw2EeAAAAAOWs7S-UEbTZ06HRMlGL765U6lwS"
                                         data-callback='onSubmit'
                                         data-action='submit'
-                                        class="input button is-link is-light is-outlined g-recaptcha" 
-                                        type="submit" 
-                                        id="Register_Button">Register</button>
+                                        class="input button is-link is-light is-outlined g-recaptcha"
+                                        type="submit"
+                                        id="Register_Button">
+                                    Register
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -217,7 +220,8 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
         function onSubmit(token) {
-            document.getElementById("demo-form").submit();
+            document.getElementById("token").value = token;
+            document.getElementById("Register_Form").submit()
         }
     </script>
 } 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SITConnect.Services;
 using SITConnect.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace SITConnect.Controllers
 {
@@ -14,13 +15,25 @@ namespace SITConnect.Controllers
     {
 
         private UserService _db;
-        public APIController(UserService user_db)
+        private readonly UserManager<User> _UManager;
+        public APIController(UserService user_db, UserManager<User> uManager)
         {
             _db = user_db;
+            _UManager = uManager;
         }
-        public List<User> Index()
+        public async Task<IActionResult> Index()
         {
-            return _db.retrieveUsers();
+            var user = await _UManager.GetUserAsync(HttpContext.User);
+            
+            if (user != null)
+            {
+                return Ok(_db.retrieveUsers());
+            }
+            else
+            {
+                HttpContext.Response.StatusCode = 403;
+                return Forbid();
+            }
         }
 
     }

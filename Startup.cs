@@ -13,6 +13,9 @@ using SITConnect.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 
 namespace SITConnect
 {
@@ -48,12 +51,18 @@ namespace SITConnect
                 .AddEntityFrameworkStores<UserDbContext>()
                 .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
-            services.AddAuthentication();
+            services.AddAuthentication().AddCookie();
 
             services.ConfigureApplicationCookie(options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromSeconds(20);
                 options.SlidingExpiration = false;
+
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    return Task.CompletedTask;
+                };
             });
 
             services.Configure<IdentityOptions>(opt =>
@@ -80,6 +89,9 @@ namespace SITConnect
                 opt.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
             });
 
+
+            services.AddHttpClient();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -88,14 +100,15 @@ namespace SITConnect
 
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                // app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error/500");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
             app.UseHttpsRedirection();
 
 
@@ -107,6 +120,8 @@ namespace SITConnect
 
             app.UseSession();
             app.UseAuthentication();
+
+            
 
             app.UseEndpoints(endpoints =>
             {

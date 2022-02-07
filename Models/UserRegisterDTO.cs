@@ -37,6 +37,9 @@ namespace SITConnect.Models
         [Required]
         public string Password { get; set; }
 
+        [Required]
+        public string token { get; set; }
+
         
     }
 }

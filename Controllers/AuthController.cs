@@ -16,6 +16,7 @@ using SendGrid;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using System.Text;
+using System.Net.Http;
 
 namespace SITConnect.Controllers
 {
@@ -29,16 +30,18 @@ namespace SITConnect.Controllers
         private readonly UserManager<User> _UManager;
         private readonly SignInManager<User> _SIManager;
         private readonly AesCryptoServiceProvider _AESCrypt = new ();
+        private readonly HttpClient _HTTPClient;
 
         //Validators
         private PasswordValidator<User> passwordValidator = new();
-
+        
         
 
         public AuthController(UserService user_db,
             IHostingEnvironment env,
             UserManager<User> uManager,
-            SignInManager<User> siManager)
+            SignInManager<User> siManager
+            )
         {
             // Set Padding for AES Cryptor
             _AESCrypt.Padding = PaddingMode.PKCS7;
@@ -47,6 +50,10 @@ namespace SITConnect.Controllers
             _env = env;
             _UManager = uManager;
             _SIManager = siManager;
+            _HTTPClient = new HttpClient
+            {
+                BaseAddress = new Uri("https://www.google.com")
+            };
         }
         public IActionResult Index()
         {
@@ -66,15 +73,44 @@ namespace SITConnect.Controllers
         {
             if (ModelState.IsValid)
             {
+                var form_check = true; // To decide whether if form is valid
+                /* CAPTCHA Validation */
+
+                // Form POST data
+                var post_data = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("secret", Environment.GetEnvironmentVariable("SITConnect.CAPTCHA", EnvironmentVariableTarget.Machine)),
+                    new KeyValuePair<string, string>("response", form.token)
+                };
+
+                // Get Response
+                HttpResponseMessage res_msg = await _HTTPClient.PostAsync("/recaptcha/api/siteverify", new FormUrlEncodedContent(post_data));
+                res_msg.EnsureSuccessStatusCode();
+                ReCAPTCHAResponse res = JsonConvert.DeserializeObject<ReCAPTCHAResponse>(await res_msg.Content.ReadAsStringAsync());
+                Console.WriteLine($"Score: {res.Score}\nSuccess:{res.Success.ToString()}");
+                if (res.Score < 0.5)
+                {
+                    ModelState.AddModelError("CAPTCHA", "Failed CAPTCHA");
+                    form_check = false;
+                }
+
                 var founduser = await _UManager.FindByEmailAsync(form.Email);
                 if (founduser != null && !founduser.EmailConfirmed)
                 {
                     ModelState.AddModelError("warning", "Please Verify Your Email First");
+                    form_check = false;
                 }
                 else if (await _UManager.CheckPasswordAsync(founduser, form.Password) == false)
                 {
                     ModelState.AddModelError("error", "Invalid Credentials");
+                    form_check = false;
                 }
+
+                if(!form_check)
+                {
+                    return View("Login", form);
+                }
+
                 // Parameters = (username, password, isPersistent, LockoutOnFailure)
                 var result = await _SIManager.PasswordSignInAsync(founduser.UserName, form.Password, true, true); // Account Lockout Feature
                 if (result.Succeeded)
@@ -115,9 +151,12 @@ namespace SITConnect.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register_Post([FromForm] UserRegisterDTO form, IFormFile profile_pic)
         {
+            
+
             form.profile_pic = profile_pic;
             if (ModelState.IsValid)
             {
+
                 User user = new User
                 {
                     Email = form.Email,
@@ -128,32 +167,27 @@ namespace SITConnect.Controllers
                 };
                 user.UserName = Guid.NewGuid().ToString();
 
-                /* Credit Encryption */
-
-                // Generating Key and IV by getting a part of a Guid
-                Random rand = new();
-                user.cc_Key = Guid.NewGuid().ToString().Substring(rand.Next(0, 3), 32);
-                user.cc_IV = Guid.NewGuid().ToString().Substring(rand.Next(0, 18), 16);
-
-                // Create AES Encryptor with previously generated key and IV
-                ICryptoTransform enc = _AESCrypt.CreateEncryptor(
-                    Encoding.Default.GetBytes(user.cc_Key),
-                    Encoding.Default.GetBytes(user.cc_IV)
-                    );
-
-                using (MemoryStream mem_enc = new())
-                {
-                    using (CryptoStream crypt_enc = new(mem_enc, enc, CryptoStreamMode.Write))
-                    {
-                        using (StreamWriter sw_enc = new(crypt_enc))
-                        {
-                            sw_enc.Write(form.cc);
-                        }
-                        user.cc = mem_enc.ToArray();
-                    }
-                }
-
                 var form_check = true;
+
+                /* CAPTCHA Validation */
+
+                // Form POST data
+                var post_data = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("secret", Environment.GetEnvironmentVariable("SITConnect.CAPTCHA", EnvironmentVariableTarget.Machine)),
+                    new KeyValuePair<string, string>("response", form.token)
+                };
+
+                // Get Response
+                HttpResponseMessage res_msg = await _HTTPClient.PostAsync("/recaptcha/api/siteverify", new FormUrlEncodedContent(post_data));
+                res_msg.EnsureSuccessStatusCode();
+                ReCAPTCHAResponse res = JsonConvert.DeserializeObject<ReCAPTCHAResponse>(await res_msg.Content.ReadAsStringAsync());
+                Console.WriteLine($"Score: {res.Score}\nSuccess:{res.Success.ToString()}");
+                if (res.Score < 0.5)
+                {
+                    ModelState.AddModelError("CAPTCHA", "Failed CAPTCHA");
+                    form_check = false;
+                }
 
                 /* Image Validation*/
                 if (form.profile_pic != null)
@@ -192,7 +226,33 @@ namespace SITConnect.Controllers
                 {
                     return View("Register", form);
                 }
-                
+
+                /* Credit Encryption */
+
+                // Generating Key and IV by getting a part of a Guid
+                Random rand = new();
+                user.cc_Key = Guid.NewGuid().ToString().Substring(rand.Next(0, 3), 32);
+                user.cc_IV = Guid.NewGuid().ToString().Substring(rand.Next(0, 18), 16);
+
+                // Create AES Encryptor with previously generated key and IV
+                ICryptoTransform enc = _AESCrypt.CreateEncryptor(
+                    Encoding.Default.GetBytes(user.cc_Key),
+                    Encoding.Default.GetBytes(user.cc_IV)
+                    );
+
+                using (MemoryStream mem_enc = new())
+                {
+                    using (CryptoStream crypt_enc = new(mem_enc, enc, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter sw_enc = new(crypt_enc))
+                        {
+                            sw_enc.Write(form.cc);
+                        }
+                        user.cc = mem_enc.ToArray();
+                    }
+                }
+
+
                 // Create User
                 var result = await _UManager.CreateAsync(user, form.Password);
                 if (result.Succeeded)

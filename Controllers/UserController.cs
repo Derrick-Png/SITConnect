@@ -15,6 +15,7 @@ using System.Security.Claims;
 
 namespace SITConnect.Controllers
 {
+    [Route("User/")]
     public class UserController : Controller
     {
         private readonly AesCryptoServiceProvider _AESCrypt = new();
@@ -71,11 +72,20 @@ namespace SITConnect.Controllers
             return RedirectToAction("Login", "Auth");
         }
 
+        [HttpGet("images/{id}")]
         public void images(string id)
         {
-            var file = "/user/images/" + id + Path.GetExtension(System.IO.Directory.GetFiles(Path.Combine(_env.WebRootPath, "user/images/"), $"{id}.*")[0]);
+            var file = "/user/images/" + id + Path.GetExtension(Directory.GetFiles(Path.Combine(_env.WebRootPath, "user/images/"), $"{id}.*")[0]);
             HttpContext.Response.Redirect(file);
             return;
+        }
+        [HttpGet("Crash")]
+        public IActionResult Crash()
+        {
+            User user = null;
+            // Accessing a property of an object (in this case email) that does not have an instance
+            Console.WriteLine(user.Email);
+            return View();
         }
     }
 }
