@@ -10,22 +10,22 @@ namespace SITConnect.Models
 {
     public class User : IdentityUser
     {
-        [Required]
         [PersonalData]
         public string fname { get; set; }
 
-        [Required]
         [PersonalData]
         public string lname { get; set; }
 
-        [Required]
         [PersonalData]
-        public string cc { get; set; } // Should be Encrypted
+        public byte[] cc { get; set; }
 
-        [Required]
         [PersonalData]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:d}")]
+        public string cc_Key { get; set; }
+
+        [PersonalData]
+        public string cc_IV { get; set; }
+
+        [PersonalData]
         public DateTime dob { get; set; }
         
     }

@@ -12,6 +12,7 @@ using SITConnect.Models;
 using SITConnect.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace SITConnect
 {
@@ -47,6 +48,14 @@ namespace SITConnect
                 .AddEntityFrameworkStores<UserDbContext>()
                 .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
 
+            services.AddAuthentication();
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromSeconds(20);
+                options.SlidingExpiration = false;
+            });
+
             services.Configure<IdentityOptions>(opt =>
             {
                 // Strong Password Part 1
@@ -65,7 +74,12 @@ namespace SITConnect
                 opt.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 opt.User.RequireUniqueEmail = true; // Unique Email
+
+
+                // User Claims
+                opt.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
             });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,6 +106,7 @@ namespace SITConnect
             app.UseAuthorization();
 
             app.UseSession();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {

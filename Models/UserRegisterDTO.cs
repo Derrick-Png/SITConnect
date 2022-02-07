@@ -14,12 +14,15 @@ namespace SITConnect.Models
         public Guid id { get; set; }
 
         [Required]
+        [RegularExpression(@"^[A-Za-z ]+$", ErrorMessage = "First Name can only contain alphabets")]
         public string fname { get; set; }
 
         [Required]
+        [RegularExpression(@"^[A-Za-z ]+$", ErrorMessage = "Last Name can only contain alphabets")]
         public string lname { get; set; }
 
         [Required]
+        [CreditCard]
         public string cc { get; set; } // Should be Encrypted
 
         [Required]
@@ -28,6 +31,7 @@ namespace SITConnect.Models
         public DateTime dob { get; set; }
 
         [Required]
+        [RegularExpression(@"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$", ErrorMessage = "Invalid Format for Email")]
         public string Email { get; set; }
 
         [Required]

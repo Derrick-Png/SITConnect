@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SITConnect.Services;
@@ -12,23 +13,36 @@ using System.IO;
 using Microsoft.AspNetCore.Identity;
 using SendGrid.Helpers.Mail;
 using SendGrid;
+using System.Text.RegularExpressions;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SITConnect.Controllers
 {
     public class AuthController : Controller
     {
-
+        // Storage
         private UserService _db;
         private readonly IHostingEnvironment _env;
 
+        // Providers/Managers
         private readonly UserManager<User> _UManager;
         private readonly SignInManager<User> _SIManager;
+        private readonly AesCryptoServiceProvider _AESCrypt = new ();
 
-        public AuthController(UserService user_db, 
-            IHostingEnvironment env, 
+        //Validators
+        private PasswordValidator<User> passwordValidator = new();
+
+        
+
+        public AuthController(UserService user_db,
+            IHostingEnvironment env,
             UserManager<User> uManager,
             SignInManager<User> siManager)
         {
+            // Set Padding for AES Cryptor
+            _AESCrypt.Padding = PaddingMode.PKCS7;
+
             _db = user_db;
             _env = env;
             _UManager = uManager;
@@ -61,16 +75,25 @@ namespace SITConnect.Controllers
                 {
                     ModelState.AddModelError("error", "Invalid Credentials");
                 }
-                var result = await _SIManager.PasswordSignInAsync(founduser.UserName, form.Password, true, true);
-                if(result.Succeeded)
+                // Parameters = (username, password, isPersistent, LockoutOnFailure)
+                var result = await _SIManager.PasswordSignInAsync(founduser.UserName, form.Password, true, true); // Account Lockout Feature
+                if (result.Succeeded)
                 {
                     string serialized_user = JsonConvert.SerializeObject(founduser);
+                    string access_token = Guid.NewGuid().ToString();
+
+                    // Init User
                     HttpContext.Session.SetString("user", serialized_user);
+
+                    // Session Validation [To prevent session fixation]
+                    HttpContext.Session.SetString("AuthToken", access_token);
+                    Response.Cookies.Append("AuthToken", access_token);
+
                     return RedirectToAction("Index", "User");
                 }
                 else if (result.IsLockedOut)
                 {
-                    ModelState.AddModelError("error", "Account Is Locked Out");   
+                    ModelState.AddModelError("error", "Account Is Locked Out");
                 }
             }
             return View("Login", form);
@@ -92,6 +115,7 @@ namespace SITConnect.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register_Post([FromForm] UserRegisterDTO form, IFormFile profile_pic)
         {
+            form.profile_pic = profile_pic;
             if (ModelState.IsValid)
             {
                 User user = new User
@@ -99,65 +123,122 @@ namespace SITConnect.Controllers
                     Email = form.Email,
                     fname = form.fname,
                     lname = form.lname,
-                    cc = form.cc, // TODO: Encrypt (With Key IV)
+                    //cc = form.cc, 
                     dob = form.dob,
                 };
                 user.UserName = Guid.NewGuid().ToString();
-                form.profile_pic = profile_pic;
+
+                /* Credit Encryption */
+
+                // Generating Key and IV by getting a part of a Guid
+                Random rand = new();
+                user.cc_Key = Guid.NewGuid().ToString().Substring(rand.Next(0, 3), 32);
+                user.cc_IV = Guid.NewGuid().ToString().Substring(rand.Next(0, 18), 16);
+
+                // Create AES Encryptor with previously generated key and IV
+                ICryptoTransform enc = _AESCrypt.CreateEncryptor(
+                    Encoding.Default.GetBytes(user.cc_Key),
+                    Encoding.Default.GetBytes(user.cc_IV)
+                    );
+
+                using (MemoryStream mem_enc = new())
+                {
+                    using (CryptoStream crypt_enc = new(mem_enc, enc, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter sw_enc = new(crypt_enc))
+                        {
+                            sw_enc.Write(form.cc);
+                        }
+                        user.cc = mem_enc.ToArray();
+                    }
+                }
+
+                var form_check = true;
+
+                /* Image Validation*/
                 if (form.profile_pic != null)
                 {
-
-                    Console.WriteLine($"Test test {form.profile_pic.FileName}");
-                    // Console.WriteLine($"id:{user.id}\nemail:{user.email}\npassword:{user.password}");
                     try
                     {
                         System.Drawing.Image.FromStream(form.profile_pic.OpenReadStream()); // Read Image to Validate
-                        var pfp_filepath = Path.Combine(_env.WebRootPath, "user", "images", user.UserName.ToString() + Path.GetExtension(form.profile_pic.FileName));
-                        form.profile_pic.CopyTo(new FileStream(pfp_filepath, FileMode.Create));
+                        var image_file_ext = Path.GetExtension(form.profile_pic.FileName);
+                        if (image_file_ext != ".jpg" && image_file_ext != ".png")
+                        {
+                            ModelState.AddModelError("", "Invalid Image");
+                            form_check = false;
+                        }
                     }
                     catch
                     {
                         ModelState.AddModelError("", "Invalid Image");
-                        return View("Register", form);
+                        form_check = false;
+                    }
+                }
+
+                /* Password Validation */
+                // Not part of the model because it is not made from data annotation
+                // Password Requirements are from Identity
+                var password_result = await passwordValidator.ValidateAsync(_UManager, user, form.Password);
+                if (!password_result.Succeeded)
+                {
+                    foreach (var error in password_result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    form_check = false;
+                }
+
+                if(!form_check)
+                {
+                    return View("Register", form);
+                }
+                
+                // Create User
+                var result = await _UManager.CreateAsync(user, form.Password);
+                if (result.Succeeded)
+                {
+
+                    // Create Profile Picture
+                    if (form.profile_pic != null)
+                    {
+                        var pfp_filepath = Path.Combine(_env.WebRootPath, "user", "images", user.UserName.ToString() + Path.GetExtension(form.profile_pic.FileName));
+                        form.profile_pic.CopyTo(new FileStream(pfp_filepath, FileMode.Create));
                     }
 
+                    //* Email Verification *//
+
+                    // Generate Confirmation Token and Set up Link
+                    string confirmationToken = await _UManager.GenerateEmailConfirmationTokenAsync(user);
+                    string confirmationLink = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, token = confirmationToken }, HttpContext.Request.Scheme);
+
+                    // Send Email through SendGrid
+                    var apiKey = Environment.GetEnvironmentVariable("SITConnect.SendGrid", EnvironmentVariableTarget.Machine);
+                    var fromEmail = Environment.GetEnvironmentVariable("SITConnect.SendGrid.FromEmail", EnvironmentVariableTarget.Machine);
+                    Console.WriteLine($"Using key {apiKey}\nUsing email {fromEmail}");
+                    var client = new SendGridClient(apiKey);
+                    var from = new EmailAddress(fromEmail, "SITConnect");
+                    var subject = "SITConnect by Derrick | Verification Link";
+                    var to = new EmailAddress(user.Email, user.fname);
+                    var plainTextContent = "and easy to do anywhere, even with C#";
+                    var htmlContent = $"Verification Link of your account For SITConnect is <a href='{confirmationLink}'>here</a>";
+                    var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                    var response = await client.SendEmailAsync(msg);
+                    Console.WriteLine(response.Body.ReadAsStringAsync().Result);
+
+                    return RedirectToAction("Login", "Auth");
                 }
+                else
+                {
+                    if (result.Errors.Count() > 0)
+                    {
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                    }
                     return View("Register", form);
-                //}
-                //var result = await _UManager.CreateAsync(user, form.Password);
-                //if (result.Succeeded)
-                //{
+                }
 
-                //    string confirmationToken =  await _UManager.GenerateEmailConfirmationTokenAsync(user);
-
-                //    string confirmationLink = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, token = confirmationToken }, HttpContext.Request.Scheme);
-
-                //    var apiKey = Environment.GetEnvironmentVariable("SITConnect.SendGrid", EnvironmentVariableTarget.Machine);
-                //    var fromEmail = Environment.GetEnvironmentVariable("SITConnect.SendGrid.FromEmail", EnvironmentVariableTarget.Machine);
-                //    Console.WriteLine($"Using key {apiKey}\nUsing email {fromEmail}");
-                //    var client = new SendGridClient(apiKey);
-                //    var from = new EmailAddress(fromEmail, "SITConnect");
-                //    var subject = "SITConnect by Derrick | Verification Link";
-                //    var to = new EmailAddress(user.Email, user.fname);
-                //    var plainTextContent = "and easy to do anywhere, even with C#";
-                //    var htmlContent = $"Verification Link of your account For SITConnect is <a href='{confirmationLink}'>here</a>";
-                //    var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-                //    var response = await client.SendEmailAsync(msg);
-                //    Console.WriteLine(response.Body.ReadAsStringAsync().Result);
-
-                //    return RedirectToAction("Login", "Auth");
-                //}
-                //else
-                //{
-                //    if(result.Errors.Count() > 0)
-                //    {
-                //        foreach(var error in result.Errors)
-                //        {
-                //            ModelState.AddModelError("", error.Description);
-                //        }
-                //    }
-                //    return View("Register", form);
-                //}
             }
             else
             {
@@ -177,12 +258,31 @@ namespace SITConnect.Controllers
             else
             {
                 ViewBag.Message = "Error while confirming your email";
-                return RedirectToAction("Login","Auth", new { status="Error" });
+                return RedirectToAction("Login", "Auth", new { status = "Error" });
             }
         }
 
         public IActionResult Sign_Out()
         {
+
+            HttpContext.Session.Clear();
+
+            // Remove Session Cookie
+            if (Request.Cookies[".AspNetCore.Session"] != null)
+            {
+                Response.Cookies.Delete(".AspNetCore.Session");
+            }
+            // Remove Auth Token
+            if (Request.Cookies["AuthToken"] != null)
+            {
+                Response.Cookies.Delete("AuthToken");
+            }
+
+            if (Request.Cookies[".AspNetCore.Identity.Application"] != null)
+            {
+                Response.Cookies.Delete(".AspNetCore.Identity.Application");
+            }
+
             return RedirectToAction("Index", "Home");
         }
 
