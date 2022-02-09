@@ -1,0 +1,118 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model User
+@{
+    Layout = "~/Views/Shared/_Layout_3.cshtml";
+}
+<div class="column is-10 is-offset-2">
+    <div class="container slide-up">
+        <div class="columns is-gapless">
+            <div class="column is-10 is-flex">
+                <div class="box is-flex">
+                    <div class="hero">
+                        <div class="hero-head">
+                            <div class="navbar">
+                                <div class="navbar-brand">
+                                    <span class="title">
+                                        Profile
+                                    </span>
+                                </div>
+                                <div class="navbar-menu">
+                                    <div class="navbar-end">
+                                        @if (Model.authy_id == null)
+                                        {
+                                            <div class="navbar-item">
+                                                <a class="button is-secondary is-light" asp-controller="User" asp-action="Add_2FA">
+                                                    <span class="icon is-left">
+                                                        <i class="fas fa-lock"></i>
+                                                    </span>
+                                                    <span>
+                                                        Add 2FA
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        }
+                                        <div class="navbar-item">
+                                            <a class="button is-warning is-light" asp-controller="User" asp-action="Change_Password">
+                                                <span class="icon is-left">
+                                                    <i class="fas fa-key"></i>
+                                                </span>
+                                                <span>
+                                                    Change Password
+                                                </span>
+                                            </a>
+                                        </div>
+                                        <div class="navbar-item">
+                                            <a class="button is-info" asp-controller="Auth" asp-action="Sign_Out">
+                                                <span class="icon is-left">
+                                                    <i class="fas fa-arrow-left"></i>
+                                                </span>
+                                                <span>
+                                                    Sign Out
+                                                </span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hero-body">
+                            <div class="tile is-ancestor is-vertical ">
+                                <div class="tile has-text-centered flex">
+                                    <figure class="image is-128x128">
+                                        <img class="is-rounded" src="/User/images/@Model.UserName" onerror="this.src='https://bulma.io/images/placeholders/128x128.png'" />
+                                    </figure>
+                                </div>
+                                &nbsp;
+                                <div class="tile is-vertical slide-up fade-in">
+                                    <div class="field">
+                                        <label class="label">Name</label>
+                                        <div class="control">
+                                            <p class="subtitle">@Model.fname @Model.lname </p>
+                                        </div>
+                                    </div>
+                                    &nbsp;
+                                    <div class="field">
+                                        <label class="label">Email </label>
+                                        <div class="control">
+                                            <p class="subtitle">@Model.Email</p>
+                                        </div>
+                                    </div>
+                                    &nbsp;
+                                    <div class="field">
+                                        <label class="label">Password </label>
+                                        <div class="control">
+                                            <p class="subtitle">@Model.PasswordHash</p>
+                                        </div>
+                                    </div>
+                                    &nbsp;
+                                    <div class="field">
+                                        <label class="label">Credit Card </label>
+                                        <div class="control">
+                                            <p class="subtitle">@System.Text.Encoding.Default.GetString(Model.cc)</p>
+                                        </div>
+                                    </div>
+                                    &nbsp;
+                                    <div class="field">
+                                        <label class="label">Date Of Birth</label>
+                                        <div class="control">
+                                            <p class="subtitle">@Html.DisplayFor(model => model.dob)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <div class="hero-foot fade-in">
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

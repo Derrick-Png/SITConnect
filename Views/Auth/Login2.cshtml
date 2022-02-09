@@ -1,0 +1,30 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/Shared/_Layout_2.cshtml";
+}
+<div class="container has-text-centered slide-up">
+    <form asp-controller="Auth" asp-action="Register" method="post">
+        <div class="file is-boxed is-info">
+            <div class="column is-8 is-offset-2" style="border: 1px solid black">
+                <h3 class="title">Login</h3>
+
+                <div class="field is-centered">
+                        <div class="control">
+                            <input class="input is-info" type='text' placeholder="Email" />
+                        </div>
+                </div>
+                <div class="field is-centered">
+
+                    <input class="input is-info" type='text' placeholder="Password" />
+                    
+                </div>
+
+                <div class="field is-right">
+                    <button class="button is-right is-info" type="submit">Register</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -124,3 +124,9 @@ html {
         transform: translateY(0)
     }
 }
+
+#particles-js canvas {
+    position: absolute;
+    height: 100vh;
+    z-index: -1;
+}

@@ -1,22 +1,227 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@model SITConnect.Models.UserRegisterDTO
 @{
-    Layout = "~/Views/Shared/_Layout_2.cshtml";
+    Layout = "~/Views/Shared/_Layout_3.cshtml";
 }
-<div class="container has-text-centered slide-up">
-    <div class="file is-boxed is-info">
-        <div class="column is-8 is-offset-2" style="border: 1px solid black">
-            <h3 class="title">Register</h3>
+<div class="column is-8 is-offset-3">
+    <div class="container has-text-centered slide-up">
 
-            <div class="field is-grouped is-grouped-centered">
-                <div class="control">
-                    <input class="input is-link" type="text" placeholder="Link input">
+
+        <form id="Register_Form" asp-controller="Auth" asp-action="Register" method="post" enctype="multipart/form-data">
+            <div class="columns is-gapless is-grouped">
+                <div class="column is-5 is-flex">
+                    <div class="box is-flex">
+                        <div class="hero">
+                            <div class="hero-head">
+                                <div class="navbar">
+                                    <div class="navbar-menu">
+                                        <div class="navbar-start">
+                                            <a class="is-info" asp-controller="Auth" asp-action="Login">
+                                                <span class="icon is-left">
+                                                    <i class="fas fa-arrow-left"></i>
+                                                </span>
+                                                Back
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="hero-body">
+                                <div class="container has-text-centered slide-up fade-in">
+                                    <p class="title fade-in">
+                                        <img src="~/logo.png" width="200" />
+                                    </p>
+                                    <p class="subtitle fade-in">
+                                        Stationaries at the lowest prices
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="hero-foot fade-in">
+                                Developed By Derrick Png
+
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
-                <div class="control">
-                    <input class="input is-link" type="text" placeholder="Link input">
+                <div class="column is-6">
+                    <div class="box">
+                        @*<h3 class="title"><a class="is-link" asp-controller="Auth" asp-action="Login">Login </a> / Register</h3>*@
+                        <p style="font-size:12px;">&nbsp;</p>
+                        <div class="field is-centered">
+
+
+                            <div class="control">
+                                <div class="file is-boxed is-centered">
+                                    <label class="file-label">
+                                        @Html.EditorFor(m => m.profile_pic, new { htmlAttributes = new { @class = "file-input", @id = "profile_pfp" } })
+                                        <figure class="image is-128x128" style="border: 1px solid black">
+                                            <img class="is-rounded" id="preview_pfp" src="/images/upload_2.png">
+                                        </figure>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                        <p style="font-size:6px;">&nbsp;</p>
+                        <div class="field is-grouped is-grouped-centered">
+                            @*<div class="control">
+                <label class="label">Name</label>
+            </div>*@
+                            <div class="control is-expanded has-icons-left">
+                                @Html.EditorFor(m => m.fname, new { htmlAttributes = new { @class = "input is-link", @placeholder = "First Name" } })
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <span class="help is-danger" id="fname_Error">
+                                    &nbsp
+                                </span>
+                            </div>
+                            <div class="control is-expanded has-icons-left">
+                                @Html.EditorFor(m => m.lname, new { htmlAttributes = new { @class = "input is-link", @placeholder = "Last Name" } })
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <span class="help is-danger" id="lname_Error">
+                                    &nbsp
+                                </span>
+                            </div>
+                        </div>
+                        <p style="font-size:6px;">&nbsp;</p>
+
+                        <div class="field is-grouped is-grouped-centered">
+                            @*<div class="control">
+                <label class="label">Email</label>
+            </div>*@
+                            <div class="control is-expanded has-icons-left">
+                                @Html.EditorFor(m => m.Email, new { htmlAttributes = new { @class = "input is-primary", @placeholder = "Email", @type = "email" } })
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <span class="help is-danger" id="Email_Error">
+                                    &nbsp
+                                </span>
+                            </div>
+                        </div>
+                        <p style="font-size:6px;">&nbsp;</p>
+
+                        <div class="field is-grouped is-grouped-centered">
+                            <div class="control is-expanded has-icons-left">
+                                @Html.EditorFor(m => m.Password, new { htmlAttributes = new { @class = "input is-primary", @placeholder = "Password", @type = "password" } })
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field is-grouped is-grouped-centered">
+                            <div class="control is-expanded has-icons-left">
+                                <div class="input button" id="Password_Error_1_Button">
+                                    <span>Minimum 12 Characters</span>
+                                </div>
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-check" id="Password_Error_1_Icon" style="color:gray"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field is-grouped is-grouped-centered">
+                            <div class="control is-expanded has-icons-left">
+                                <div class="input button" id="Password_Error_2_Button">
+                                    <span>Uses lower-case & upper-case</span>
+                                </div>
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-check" id="Password_Error_2_Icon" style="color:gray"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field is-grouped is-grouped-centered">
+                            <div class="control is-expanded has-icons-left">
+                                <div class="input button" id="Password_Error_3_Button">
+                                    <span>Uses number(s)</span>
+                                </div>
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-check" id="Password_Error_3_Icon" style="color:gray"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="field is-grouped is-grouped-centered">
+                            <div class="control is-expanded has-icons-left">
+                                <div class="input button" id="Password_Error_4_Button">
+                                    <span>Uses special character(s) (Ex. $, %)</span>
+                                </div>
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-check" id="Password_Error_4_Icon" style="color:gray"></i>
+                                </span>
+                            </div>
+                        </div>
+
+
+                        <p style="font-size:6px;">&nbsp;</p>
+
+                        <div class="field is-grouped is-grouped-centered">
+                            @*<div class="control">
+                <label class="label">Date Of Birth</label>
+            </div>*@
+                            <div class="control is-expanded">
+                                @Html.EditorFor(m => m.dob, new { htmlAttributes = new { @class = "input is-info", @placeholder = "Date Of Birth" } })
+                            </div>
+                            <span class="help is-danger" id="dob_Error">
+                                &nbsp
+                            </span>
+                        </div>
+
+                        <p style="font-size:6px;"> &nbsp; </p>
+                        <div class="field is-grouped is-grouped-centered">
+                            @*<div class="control">
+                <label class="label">Credit Card</label>
+            </div>*@
+                            <div class="control is-expanded has-icons-left">
+                                @Html.EditorFor(m => m.cc, new { htmlAttributes = new { @class = "input is-warning", @placeholder = "Credit Card" } })
+                                <span class="icon is-small is-left">
+                                    <i class="fas fa-credit-card"></i>
+                                </span>
+                                <span class="help is-danger" id="cc_Error">
+                                    &nbsp
+                                </span>
+                            </div>
+
+                        </div>
+                        <p style="font-size:6px;">&nbsp;</p>
+                        @Html.ValidationSummary()
+                        <input type="hidden" id="token" name="token" />
+                        <div class="field is-grouped is-centered">
+                            <div class="control is-expanded">
+                                <button data-sitekey="6LfBw2EeAAAAAOWs7S-UEbTZ06HRMlGL765U6lwS"
+                                        data-callback='onSubmit'
+                                        data-action='submit'
+                                        class="input button is-link is-light is-outlined g-recaptcha"
+                                        type="submit"
+                                        id="Register_Button">
+                                    Register
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
+
     </div>
 </div>
+
+@section scripts {
+    <script src="~/js/register.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        function onSubmit(token) {
+            document.getElementById("token").value = token;
+            document.getElementById("Register_Form").submit()
+        }
+    </script>
+} 
