@@ -35,11 +35,10 @@ namespace SITConnect
             services.AddControllersWithViews();
 
             services.AddDbContextPool<UserDbContext>(options=> { options.UseSqlServer(Configuration.GetConnectionString("db")); });
-            services.AddScoped<UserService>();
 
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.IdleTimeout = TimeSpan.FromSeconds(120);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
@@ -55,7 +54,7 @@ namespace SITConnect
 
             services.ConfigureApplicationCookie(options =>
             {
-                options.ExpireTimeSpan = TimeSpan.FromSeconds(20);
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
                 options.SlidingExpiration = false;
 
                 options.Events.OnRedirectToAccessDenied = context =>
@@ -89,7 +88,7 @@ namespace SITConnect
                 opt.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
             });
 
-
+            services.AddSingleton<AuthyService>();
             services.AddHttpClient();
 
         }
@@ -100,7 +99,7 @@ namespace SITConnect
 
             if (env.IsDevelopment())
             {
-                // app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage();
             }
             else
             {

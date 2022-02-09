@@ -14,11 +14,9 @@ namespace SITConnect.Controllers
     public class APIController : Controller
     {
 
-        private UserService _db;
         private readonly UserManager<User> _UManager;
-        public APIController(UserService user_db, UserManager<User> uManager)
+        public APIController(UserManager<User> uManager)
         {
-            _db = user_db;
             _UManager = uManager;
         }
         public async Task<IActionResult> Index()
@@ -27,7 +25,7 @@ namespace SITConnect.Controllers
             
             if (user != null)
             {
-                return Ok(_db.retrieveUsers());
+                return Ok(_UManager.Users.ToList());
             }
             else
             {

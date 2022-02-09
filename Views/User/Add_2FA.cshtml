@@ -1,0 +1,141 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model SITConnect.Models.UserAdd2FADTO
+@{
+    Layout = "~/Views/Shared/_Layout_3.cshtml";
+}
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+<div class="column is-8 is-offset-4">
+    <div class="container slide-up">
+        <div class="columns is-gapless">
+            <div class="column is-8 is-flex">
+                <div class="box is-flex">
+                    <div class="hero">
+                        <div class="hero-head">
+                            <div class="navbar">
+                                <div class="navbar-brand">
+                                    <a class="button is-info is-light" asp-controller="User" asp-action="Index">
+                                        <span class="icon is-left">
+                                            <i class="fas fa-arrow-left"></i>
+                                        </span>
+                                        <span>
+                                            Back
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hero-body">
+                            <form id="Add_2FA_Form" asp-controller="User" asp-action="Add_2FA" method="post" enctype="multipart/form-data">
+                                <div class="field">
+                                    <label class="label">Country Code</label>
+                                    <div class="control">
+                                        @Html.DropDownListFor(m => m.country_code,
+                                       UserAdd2FADTO.countries
+                                       , "Select Your Country"
+                                       , new { @class = "select is-link" }
+                                       )
+                                    </div>
+                                </div>
+                                <div class="field">
+
+                                    <label class="label">Phone Number</label>
+                                    <div class="control">
+                                        @Html.EditorFor(m => m.phone_no, new { htmlAttributes = new { @class = "input is-info", @placeholder = "Phone Number", @type = "text" } })
+                                    </div>
+                                </div>
+                                <input type="hidden" id="token" name="token" />
+                                @Html.ValidationSummary()
+                                <div class="field">
+
+
+                                    <div class="control is-expanded">
+                                        <button data-sitekey="6LfBw2EeAAAAAOWs7S-UEbTZ06HRMlGL765U6lwS"
+                                                data-callback='onSubmit'
+                                                data-action='submit'
+                                                class="input button is-primary is-light g-recaptcha" 
+                                                id="Add_2FA_Button">
+                                            Add 2FA
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+
+                        <div class="hero-foot fade-in">
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script>
+        window.onload = () => {
+            var country = document.getElementById("country_code")
+            var phone = document.getElementById("phone_no")
+            var button = document.getElementById("Add_2FA_Button")
+            var checks = [true, true]
+
+            function setButton(index, value) {
+                checks[index] = value
+                var check = true
+                for (var i = 0; i < checks.length; i++) {
+                    if (checks[i]) {
+                        check = false
+                    }
+                }
+                button.disabled = !check
+            }
+
+
+            country.onchange = () => {
+                if (country.value != "") {
+                    setButton(0, false)
+                }
+                else {
+                    setButton(0, true)
+                }
+            }
+            phone.onchange = () => {
+                var inner_check = true
+                if (phone.value == "") {
+                    inner_check = false
+                }
+                if (!(phone.value.length >= 4 && phone.value.length <= 12)) {
+                    inner_check = false
+                }
+                if (!(/^[0-9]*$/.test(phone.value))) {
+                    inner_check = false
+                }
+                setButton(1, !inner_check)
+            }
+
+            button.disabled = true
+
+            if (phone.value != "") {
+                phone.onchange()
+            }
+            if (country.value != "") {
+                country.onchange()
+            }
+        }
+    </script>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        function onSubmit(token) {
+            document.getElementById("token").value = token;
+            document.getElementById("Add_2FA_Form").submit()
+        }
+    </script>
+}

@@ -1,0 +1,78 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model SITConnect.Models.UserAuthyFADTO
+@{
+    Layout = "~/Views/Shared/_Layout_3.cshtml";
+}
+<div class="column is-8 is-offset-4">
+    <div class="container slide-up">
+        <div class="columns is-gapless">
+            <div class="column is-8 is-flex">
+                <div class="box is-flex">
+                    <div class="hero">
+                        <div class="hero-head">
+                            <div class="navbar">
+                                <div class="navbar-brand">
+                                    <a class="button is-info is-light" asp-controller="Auth" asp-action="Login">
+                                        <span class="icon is-left">
+                                            <i class="fas fa-arrow-left"></i>
+                                        </span>
+                                        <span>
+                                            Back
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hero-body">
+                            <form id="AuthyFA_Form" asp-controller="Auth" asp-action="AuthyFA" method="post" enctype="multipart/form-data">
+                                <div class="title">
+                                    Authy Phone Verification
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Verification Code</label>
+                                    <div class="control">
+                                        @Html.EditorFor(m => m.code, new { htmlAttributes = new { @class = "input is-info", @placeholder = "Verification Code", @type = "text" } })
+                                    </div>
+                                </div>
+                                <br />
+                                <input type="hidden" id="token" name="token" />
+                                @Html.ValidationSummary()
+                                <div class="field">
+                                    <div class="control is-expanded">
+                                        <button data-sitekey="6LfBw2EeAAAAAOWs7S-UEbTZ06HRMlGL765U6lwS"
+                                                data-callback='onSubmit'
+                                                data-action='submit'
+                                                class="input button is-warning is-light is-outlined g-recaptcha"
+                                                type="submit"
+                                                id="AuthyFA_Button">
+                                            Verify
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+
+                        <div class="hero-foot fade-in">
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        function onSubmit(token) {
+            document.getElementById("token").value = token;
+            document.getElementById("AuthyFA_Form").submit()
+        }
+    </script>
+}

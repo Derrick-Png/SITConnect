@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SITConnect.Models
 {
-    public class UserRegisterDTO 
+    public class UserRegisterDTO
     {
         public IFormFile profile_pic;
 
@@ -40,6 +40,6 @@ namespace SITConnect.Models
         [Required]
         public string token { get; set; }
 
-        
+
     }
 }

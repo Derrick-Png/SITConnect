@@ -27,6 +27,16 @@ namespace SITConnect.Models
 
         [PersonalData]
         public DateTime dob { get; set; }
+
+        [PersonalData]
+        public string country_code { get; set; }
+
+        [PersonalData]
+        public string phone_no { get; set; }
+
+        [PersonalData]
+        public string authy_id { get; set; }
+
         
     }
 }

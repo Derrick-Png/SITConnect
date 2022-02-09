@@ -20,10 +20,10 @@ using System.Net.Http;
 
 namespace SITConnect.Controllers
 {
+    [Route("Auth")]
     public class AuthController : Controller
     {
         // Storage
-        private UserService _db;
         private readonly IHostingEnvironment _env;
 
         // Providers/Managers
@@ -31,29 +31,31 @@ namespace SITConnect.Controllers
         private readonly SignInManager<User> _SIManager;
         private readonly AesCryptoServiceProvider _AESCrypt = new ();
         private readonly HttpClient _HTTPClient;
+        private readonly AuthyService _Authy;
 
         //Validators
         private PasswordValidator<User> passwordValidator = new();
         
         
 
-        public AuthController(UserService user_db,
+        public AuthController(
             IHostingEnvironment env,
             UserManager<User> uManager,
-            SignInManager<User> siManager
+            SignInManager<User> siManager,
+            AuthyService authy
             )
         {
             // Set Padding for AES Cryptor
             _AESCrypt.Padding = PaddingMode.PKCS7;
-
-            _db = user_db;
             _env = env;
             _UManager = uManager;
             _SIManager = siManager;
+            _Authy = authy;
             _HTTPClient = new HttpClient
             {
                 BaseAddress = new Uri("https://www.google.com")
             };
+            
         }
         public IActionResult Index()
         {
@@ -94,12 +96,14 @@ namespace SITConnect.Controllers
                     form_check = false;
                 }
 
+                /* User Verified Validation */
                 var founduser = await _UManager.FindByEmailAsync(form.Email);
                 if (founduser != null && !founduser.EmailConfirmed)
                 {
                     ModelState.AddModelError("warning", "Please Verify Your Email First");
                     form_check = false;
                 }
+                /* Credentials Validation */
                 else if (await _UManager.CheckPasswordAsync(founduser, form.Password) == false)
                 {
                     ModelState.AddModelError("error", "Invalid Credentials");
@@ -111,29 +115,43 @@ namespace SITConnect.Controllers
                     return View("Login", form);
                 }
 
+                // Sign in User
                 // Parameters = (username, password, isPersistent, LockoutOnFailure)
                 var result = await _SIManager.PasswordSignInAsync(founduser.UserName, form.Password, true, true); // Account Lockout Feature
                 if (result.Succeeded)
                 {
-                    string serialized_user = JsonConvert.SerializeObject(founduser);
-                    string access_token = Guid.NewGuid().ToString();
+                    if (founduser.authy_id != null)
+                    {
+                        HttpContext.Session.SetString("Phone_No", founduser.phone_no);
+                        HttpContext.Session.SetString("Country_Code", founduser.country_code);
 
-                    // Init User
-                    HttpContext.Session.SetString("user", serialized_user);
+                        await _Authy.phoneTokenVerificationRequest(founduser.phone_no, founduser.country_code);
 
-                    // Session Validation [To prevent session fixation]
-                    HttpContext.Session.SetString("AuthToken", access_token);
-                    Response.Cookies.Append("AuthToken", access_token);
+                        return RedirectToAction("AuthyFA", "Auth");
+                    }
+                    else
+                    {
+                        string serialized_user = JsonConvert.SerializeObject(founduser);
+                        string access_token = Guid.NewGuid().ToString();
 
-                    return RedirectToAction("Index", "User");
+                        // Session Validation [To prevent session fixation]
+                        HttpContext.Session.SetString("AuthToken", access_token);
+                        Response.Cookies.Append("AuthToken", access_token);
+
+                        // Init User
+                        HttpContext.Session.SetString("user", serialized_user);
+                        Console.WriteLine(founduser.UserName + " logged in");
+
+                        return RedirectToAction("Index", "User");
+                    }
                 }
                 else if (result.IsLockedOut)
                 {
                     ModelState.AddModelError("error", "Account Is Locked Out");
                 }
+                
             }
             return View("Login", form);
-
         }
 
         [HttpGet("Register")]
@@ -321,8 +339,8 @@ namespace SITConnect.Controllers
                 return RedirectToAction("Login", "Auth", new { status = "Error" });
             }
         }
-
-        public IActionResult Sign_Out()
+        [HttpGet("SignOut")]
+        public async Task<IActionResult> Sign_Out()
         {
 
             HttpContext.Session.Clear();
@@ -340,11 +358,74 @@ namespace SITConnect.Controllers
 
             if (Request.Cookies[".AspNetCore.Identity.Application"] != null)
             {
+                try
+                {
+                    var user = await _UManager.GetUserAsync(HttpContext.User);
+                    Console.WriteLine(user.UserName + " logged out");
+                    
+                }
+                catch
+                {
+
+                }
                 Response.Cookies.Delete(".AspNetCore.Identity.Application");
             }
 
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpGet("2FA")]
+        public IActionResult AuthyFA()
+        {
+            return View();
+        }
+        [HttpPost("2FA")]
+        public async Task<IActionResult> AuthyFA_Post(UserAuthyFADTO form)
+        {
+            /* Authorization Validation */
+            // Get Cookie string fropm 
+            var phone_no = HttpContext.Session.GetString("Phone_No");
+            var country_code = HttpContext.Session.GetString("Country_Code");
+            if(phone_no == null || country_code == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+
+            if (ModelState.IsValid)
+            {
+                // Verify Phone Token
+                var result = await _Authy.verifyPhoneToken(
+                    phone_no,
+                    country_code,
+                    form.code
+                    );
+                if (result == true)
+                {
+                    User user = await _UManager.GetUserAsync(HttpContext.User);
+                    string serialized_user = JsonConvert.SerializeObject(user);
+                    string access_token = Guid.NewGuid().ToString();
+
+                    // Session Validation [To prevent session fixation]
+                    HttpContext.Session.SetString("AuthToken", access_token);
+                    Response.Cookies.Append("AuthToken", access_token);
+
+                    // Init User
+                    HttpContext.Session.SetString("user", serialized_user);
+                    Console.WriteLine(user.UserName + " logged in");
+
+                    return RedirectToAction("Index", "User");
+                }
+                else
+                {
+                    ModelState.AddModelError("Code", "Invalid Code");
+                    return View("AuthyFA", form);
+                }
+            }
+            else
+            {
+                return View("AuthyFA", form);
+            }
+        }
     }
 }
