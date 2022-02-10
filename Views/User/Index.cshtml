@@ -97,7 +97,15 @@
                                     <div class="field">
                                         <label class="label">Date Of Birth</label>
                                         <div class="control">
-                                            <p class="subtitle">@Html.DisplayFor(model => model.dob)</p>
+                                            <p class="subtitle">@Model.dob.ToShortDateString()</p>
+                                        </div>
+                                    </div>
+
+                                    &nbsp;
+                                    <div class="field">
+                                        <label class="label">Last Password Changed Date</label>
+                                        <div class="control">
+                                            <p class="subtitle">@Html.DisplayFor(model => model.LastPasswordChangedDate)</p>
                                         </div>
                                     </div>
                                 </div>

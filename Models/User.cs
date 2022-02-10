@@ -37,6 +37,9 @@ namespace SITConnect.Models
         [PersonalData]
         public string authy_id { get; set; }
 
-        
+        [PersonalData]
+        public DateTime LastPasswordChangedDate { get; set; }
+
+
     }
 }

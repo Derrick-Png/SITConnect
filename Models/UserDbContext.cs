@@ -18,6 +18,7 @@ namespace SITConnect.Models
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<PasswordHash> Hashs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
