@@ -239,25 +239,10 @@ namespace SITConnect.Controllers
         }
 
         [HttpGet("images/{id}")]
-        public async Task<IActionResult> images(string id)
-        {
-            var user = await _UManager.GetUserAsync(HttpContext.User);
-            /* Authenticated Validation */
-            if (user == null)
-            {
-                 return RedirectToAction("Login", "Auth");
-            }
-            try
-            {
-                var file = "/user/images/" + id + Path.GetExtension(Directory.GetFiles(Path.Combine(_env.WebRootPath, "user/images/"), $"{id}.*")[0]);
-                HttpContext.Response.Redirect(file);
-                
-            }
-            catch
-            {
-                
-            }
-            return Ok();
+        public void images(string id)
+        {   
+            var file = "/user/images/" + id + Path.GetExtension(Directory.GetFiles(Path.Combine(_env.WebRootPath, "user/images/"), $"{id}.*")[0]);
+            HttpContext.Response.Redirect(file);
         }
         [HttpGet("Crash")]
         public IActionResult Crash()
@@ -290,7 +275,7 @@ namespace SITConnect.Controllers
                 return RedirectToAction("Login", "Auth");
             }
             // Password Age Validation
-            if(user.LastPasswordChangedDate.AddMinutes(2) > DateTime.Now)
+            if(user.LastPasswordChangedDate.AddMinutes(20) < DateTime.Now)
             {
                 return RedirectToAction("Change_Password");
             }
@@ -342,6 +327,8 @@ namespace SITConnect.Controllers
                 }
 
                 // Creating user on Authy
+                Console.WriteLine($"{form.country_code} {form.phone_no}");
+
                 user.authy_id = await _Authy.registerUser(user.Email, form);
                 user.country_code = form.country_code;
                 user.phone_no = form.phone_no;

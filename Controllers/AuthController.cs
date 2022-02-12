@@ -79,6 +79,7 @@ namespace SITConnect.Controllers
             if (ModelState.IsValid)
             {
                 var form_check = true; // To decide whether if form is valid
+                var check_login = true;
                 /* CAPTCHA Validation */
 
                 // Form POST data
@@ -105,6 +106,7 @@ namespace SITConnect.Controllers
                 {
                     ModelState.AddModelError("warning", "Please Verify Your Email First");
                     form_check = false;
+                    check_login = false;
                 }
                 /* Credentials Validation */
                 else if (await _UManager.CheckPasswordAsync(founduser, form.Password) == false)
@@ -113,16 +115,23 @@ namespace SITConnect.Controllers
                     form_check = false;
                 }
 
-                if(!form_check)
+                Microsoft.AspNetCore.Identity.SignInResult result = null;
+                if(check_login)
+                {
+                    result = await _SIManager.PasswordSignInAsync(founduser, form.Password, true, true); // Account Lockout Feature
+                }
+
+                if (!form_check)
                 {
                     return View("Login", form);
                 }
-
                 // Sign in User
                 // Parameters = (username, password, isPersistent, LockoutOnFailure)
-                var result = await _SIManager.PasswordSignInAsync(founduser.UserName, form.Password, true, true); // Account Lockout Feature
+                
+
                 if (result.Succeeded)
                 {
+                    Console.WriteLine("Test2");
                     if (founduser.authy_id != null)
                     {
                         HttpContext.Session.SetString("Phone_No", founduser.phone_no);
@@ -150,6 +159,7 @@ namespace SITConnect.Controllers
                 }
                 else if (result.IsLockedOut)
                 {
+                    Console.WriteLine("Test");
                     ModelState.AddModelError("error", "Account Is Locked Out");
                 }
                 
