@@ -24,6 +24,7 @@ namespace SITConnect.Controllers
         
         // Storage
         private readonly IHostingEnvironment _env;
+        private readonly UserDbContext _db;
         
         // Managers & Providers
         private readonly UserManager<User> _UManager;
@@ -33,11 +34,12 @@ namespace SITConnect.Controllers
         // Validators
         private PasswordValidator<User> passwordValidator = new();
         private HttpClient _HTTPClient;
-        
+
         public UserController(
-            IHostingEnvironment env, 
+            IHostingEnvironment env,
             UserManager<User> uManager,
-            AuthyService authy
+            AuthyService authy,
+            UserDbContext db
             ) : base()
         {
             _AESCrypt.Padding = PaddingMode.PKCS7;
@@ -48,6 +50,7 @@ namespace SITConnect.Controllers
                 BaseAddress = new Uri("https://www.google.com")
             };
             _Authy = authy;
+            _db = db;
         }
         
         public async Task<IActionResult> Index()
@@ -57,7 +60,12 @@ namespace SITConnect.Controllers
             try
             {
                 var user = await _UManager.GetUserAsync(HttpContext.User);
-
+                // Password Age Validation
+                if (user.LastPasswordChangedDate.AddMinutes(2) < DateTime.Now)
+                {
+                    ModelState.AddModelError("Password Age", "Password needs to be changed after 2 Minutes");
+                    return RedirectToAction("Change_Password");
+                }
 
                 if (HttpContext.Session.GetString("user") != null && Request.Cookies["AuthToken"] == HttpContext.Session.GetString("AuthToken"))
                 {
@@ -165,6 +173,32 @@ namespace SITConnect.Controllers
                     form_check = false;
                 }
 
+                // Password Age Validation
+                if(user.LastPasswordChangedDate.AddMinutes(2) > DateTime.Now)
+                {
+                    ModelState.AddModelError("Password Age", "Password cannot be change within 2 Minutes");
+                    form_check = false;
+                }
+
+                /* Password History Validation */
+                var user_hashs = _db.Hashs
+                    .Where(item => item.user_id == user.Id)
+                    .OrderBy(item => item.created_date)
+                    .Take(2);
+                foreach(var hash in user_hashs.ToList())
+                {
+                    var his_check = _UManager.PasswordHasher.VerifyHashedPassword(user, hash.hash, form.New_Password);
+                    Console.WriteLine(his_check.ToString());
+                    if (his_check == PasswordVerificationResult.Success)
+                    {
+                        ModelState.AddModelError("Password History", "Password cannot be same as the previous 2 passwords");
+                        form_check = false;
+                        break;
+                    }
+                }
+
+                
+
                 if(!form_check)
                 {
                     return View("Change_Password", form);
@@ -175,6 +209,20 @@ namespace SITConnect.Controllers
                 var result = await _UManager.ResetPasswordAsync(user, token, form.New_Password);
                 if(result.Succeeded)
                 {
+                    // Find User & Store Generated Password Hash in PasswordHash Db
+                    var generated_user = await _UManager.FindByNameAsync(user.UserName);
+                    await _db.Hashs.AddAsync(new PasswordHash()
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        user_id = user.Id,
+                        hash = generated_user.PasswordHash,
+                        created_date = DateTime.Now
+                    });
+                    await _db.SaveChangesAsync();
+
+                    user.LastPasswordChangedDate = DateTime.Now;
+                    await _UManager.UpdateAsync(user);
+
                     return RedirectToAction("Index", "User", new { status="success", message="Password has been reseted successfully"});
                 }
                 else
@@ -192,10 +240,9 @@ namespace SITConnect.Controllers
 
         [HttpGet("images/{id}")]
         public void images(string id)
-        {
+        {   
             var file = "/user/images/" + id + Path.GetExtension(Directory.GetFiles(Path.Combine(_env.WebRootPath, "user/images/"), $"{id}.*")[0]);
             HttpContext.Response.Redirect(file);
-            return;
         }
         [HttpGet("Crash")]
         public IActionResult Crash()
@@ -207,8 +254,15 @@ namespace SITConnect.Controllers
         }
 
         [HttpGet("Add_2FA")]
-        public IActionResult Add_2FA()
+        public async Task<IActionResult> Add_2FA()
         {
+            var user = await _UManager.GetUserAsync(HttpContext.User);
+            /* Authenticated Validation */
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
             return View();
         }
 
@@ -219,6 +273,11 @@ namespace SITConnect.Controllers
             if (user == null)
             {
                 return RedirectToAction("Login", "Auth");
+            }
+            // Password Age Validation
+            if(user.LastPasswordChangedDate.AddMinutes(20) < DateTime.Now)
+            {
+                return RedirectToAction("Change_Password");
             }
             if (ModelState.IsValid)
             {
@@ -268,6 +327,8 @@ namespace SITConnect.Controllers
                 }
 
                 // Creating user on Authy
+                Console.WriteLine($"{form.country_code} {form.phone_no}");
+
                 user.authy_id = await _Authy.registerUser(user.Email, form);
                 user.country_code = form.country_code;
                 user.phone_no = form.phone_no;

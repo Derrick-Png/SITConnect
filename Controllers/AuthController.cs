@@ -25,6 +25,7 @@ namespace SITConnect.Controllers
     {
         // Storage
         private readonly IHostingEnvironment _env;
+        private readonly UserDbContext _db;
 
         // Providers/Managers
         private readonly UserManager<User> _UManager;
@@ -42,7 +43,8 @@ namespace SITConnect.Controllers
             IHostingEnvironment env,
             UserManager<User> uManager,
             SignInManager<User> siManager,
-            AuthyService authy
+            AuthyService authy,
+            UserDbContext db
             )
         {
             // Set Padding for AES Cryptor
@@ -55,6 +57,7 @@ namespace SITConnect.Controllers
             {
                 BaseAddress = new Uri("https://www.google.com")
             };
+            _db = db;
             
         }
         public IActionResult Index()
@@ -76,6 +79,7 @@ namespace SITConnect.Controllers
             if (ModelState.IsValid)
             {
                 var form_check = true; // To decide whether if form is valid
+                var check_login = true;
                 /* CAPTCHA Validation */
 
                 // Form POST data
@@ -102,6 +106,7 @@ namespace SITConnect.Controllers
                 {
                     ModelState.AddModelError("warning", "Please Verify Your Email First");
                     form_check = false;
+                    check_login = false;
                 }
                 /* Credentials Validation */
                 else if (await _UManager.CheckPasswordAsync(founduser, form.Password) == false)
@@ -110,16 +115,23 @@ namespace SITConnect.Controllers
                     form_check = false;
                 }
 
-                if(!form_check)
+                Microsoft.AspNetCore.Identity.SignInResult result = null;
+                if(check_login)
+                {
+                    result = await _SIManager.PasswordSignInAsync(founduser, form.Password, true, true); // Account Lockout Feature
+                }
+
+                if (!form_check)
                 {
                     return View("Login", form);
                 }
-
                 // Sign in User
                 // Parameters = (username, password, isPersistent, LockoutOnFailure)
-                var result = await _SIManager.PasswordSignInAsync(founduser.UserName, form.Password, true, true); // Account Lockout Feature
+                
+
                 if (result.Succeeded)
                 {
+                    Console.WriteLine("Test2");
                     if (founduser.authy_id != null)
                     {
                         HttpContext.Session.SetString("Phone_No", founduser.phone_no);
@@ -147,6 +159,7 @@ namespace SITConnect.Controllers
                 }
                 else if (result.IsLockedOut)
                 {
+                    Console.WriteLine("Test");
                     ModelState.AddModelError("error", "Account Is Locked Out");
                 }
                 
@@ -182,6 +195,7 @@ namespace SITConnect.Controllers
                     lname = form.lname,
                     //cc = form.cc, 
                     dob = form.dob,
+                    LastPasswordChangedDate = DateTime.Now
                 };
                 user.UserName = Guid.NewGuid().ToString();
 
@@ -275,6 +289,18 @@ namespace SITConnect.Controllers
                 var result = await _UManager.CreateAsync(user, form.Password);
                 if (result.Succeeded)
                 {
+                    // Find User & Store Generated Password Hash in PasswordHash Db
+                    var generated_user = await _UManager.FindByNameAsync(user.UserName);
+                    await _db.Hashs.AddAsync(new PasswordHash()
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        user_id = user.Id,
+                        hash = generated_user.PasswordHash,
+                        created_date = DateTime.Now
+                    });
+                    await _db.SaveChangesAsync();
+
+
 
                     // Create Profile Picture
                     if (form.profile_pic != null)
@@ -302,6 +328,8 @@ namespace SITConnect.Controllers
                     var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
                     var response = await client.SendEmailAsync(msg);
                     Console.WriteLine(response.Body.ReadAsStringAsync().Result);
+                    
+                    
 
                     return RedirectToAction("Login", "Auth");
                 }

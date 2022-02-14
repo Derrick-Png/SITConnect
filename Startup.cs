@@ -76,7 +76,7 @@ namespace SITConnect
 
 
                 opt.Lockout.AllowedForNewUsers = true;
-                opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
                 opt.Lockout.MaxFailedAccessAttempts = 3; // Login (ii)
 
                 opt.User.AllowedUserNameCharacters =
